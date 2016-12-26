@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="UTF-8">
+	<title>Insert title here</title>
+
+	<!--<link rel="stylesheet" href="http://code.jquery.com/mobile/1.3.2/jquery.mobile-1.3.2.min.css" />-->
+	<!--<script src="http://code.jquery.com/jquery-1.9.1.js"></script>-->
+	<!--<script src="http://code.jquery.com/mobile/1.3.2/jquery.mobile-1.3.2.min.js"></script>-->
+
+	<link rel="stylesheet" href="jquery.mobile-1.3.2/jquery.mobile-1.3.2.min.css" />
+	<script src="jquery-1.9.1.min.js"></script>
+	<script src="jquery.mobile-1.3.2/jquery.mobile-1.3.2.min.js"></script>
+
+	<style type="text/css">
+		#user {
+			width: 100%;
+		}
+		
+		#gameArea {
+			position: absolute;
+			margin: 0.5em 0.5em;
+		}
+		
+		#canvasView {
+			float: left;
+		}
+		
+		#myCanvas {
+			outline: 5px solid #E9967A;
+			height: 100%;
+		}
+		
+		#info {
+			margin: 0em 0.5em;
+			width: 450px;
+			;
+			height: 500px;
+			float: left;
+		}
+		
+		#statsPanel {
+			color: white;
+			position: absolute;
+			font: 24px/16px "Adobe Gothic Std";
+			width: 90%;
+			opacity: 0.7;
+			top: 430px;
+		}
+		
+		.stats0 {
+			float: left;
+			width: 10em;
+			text-align: center;
+		}
+		
+		.stats1 {
+			float: left;
+			width: 10em;
+			text-align: center;
+		}
+		
+		.box {
+			position: fixed;
+			top: -300px;
+			left: 30%;
+			width: 450px;
+			background-color: rgba(255, 255, 255, 0.7);
+			color: #000;
+			padding: 20px;
+			border: 2px solid #ccc;
+			-moz-border-radius: 20px;
+			-webkit-border-radius: 20px;
+			-khtml-border-radius: 20px;
+			-moz-box-shadow: 0 1px 5px #333;
+			-webkit-box-shadow: 0 1px 5px #333;
+			z-index: 101;
+			-webkit-transition: all 3s ease-out;
+			-ms-transition: all 3s ease-out;
+			transition: all 3s ease-out;
+		}
+		
+		a.boxclose {
+			float: right;
+			width: 26px;
+			height: 26px;
+			background: transparent url(images/cancel.png) repeat top left;
+			margin-top: -30px;
+			margin-right: -30px;
+			cursor: pointer;
+		}
+		
+		.box h1 {
+			border-bottom: 1px dashed #7F7F7F;
+			margin: -20px -20px 0px -20px;
+			padding: 10px;
+			background-color: rgba(255, 191, 191, 0.8);
+			color: #FF7777;
+			text-align: center;
+			-moz-border-radius: 20px 20px 0px 0px;
+			-webkit-border-top-left-radius: 20px;
+			-webkit-border-top-right-radius: 20px;
+			-khtml-border-top-left-radius: 20px;
+			-khtml-border-top-right-radius: 20px;
+		}
+		
+		.box p {
+			text-indent: -0.8em;
+		}
+	</style>
+</head>
+
+
+<body style="cursor:url(images/mouse1_60px.png),progress;">
+	<div data-role="page">
+		<div id="gameArea" data-role="centent">
+			<div id="canvasView">
+				<div id="statsPanel">
+					<div class="stats0" id="Score"></div>
+					<div class="stats1" id="Times"></div>
+				</div>
+				<canvas id="myCanvas" width="780" height="460" onmousedown="mouseDownHandler(event)" onmousemove="mouseMoveHandler(event)">
+				</canvas>
+			</div>
+
+
+			<div id="info">
+				<form>
+					<div id="user">
+						<div data-role="fieldcontain" class="ui-field-contain ui-body ui-br">
+							<label style="width: 100px;" data-role="none" for="username">UserName：</label>
+							<input type="text" id="username" name="username" data-mini="true">
+						</div>
+						<div data-role="fieldcontain">
+							<label style="width: 100px;" data-role="none" for="labLastScore">Last Score：</label>
+							<label id="labLastScore">0</label>
+						</div>
+						<div data-role="fieldcontain">
+							<label style="width: 100px;" data-role="none" for="labMaxScore">Max Score：</label>
+							<label id="labMaxScore">0</label>
+						</div>
+					</div>
+					<div id="gameSetting">
+						<div data-role="fieldcontain">
+							<label style="width: 100px;" data-role="none" for="gameMaxWolf">Max Wolf：</label>
+							<input type="range" id="gameMaxWolf" min="1" max="6" value="2" data-highlight="true">
+						</div>
+						<div data-role="fieldcontain">
+							<fieldset id="sltspeed" data-role="controlgroup" data-type="horizontal">
+								<legend>Speed：</legend>
+								<input type="radio" id="speedLow" name="speed" value="Low" data-mini="true" data-speed="2000" checked/>
+								<label for="speedLow">Low</label>
+								<input type="radio" id="speedMiddle" name="speed" value="Middle" data-mini="true" data-speed="1500" />
+								<label for="speedMiddle">Middle</label>
+								<input type="radio" id="speedHigh" name="speed" value="High" data-mini="true" data-speed="800" />
+								<label for="speedHigh">High</label>
+							</fieldset>
+						</div>
+						<div data-type="horizontal">
+							<a data-role="button" id="btnRefresh" class="btn" data-icon="refresh" data-inline="true" onclick=delUserData();>Refresh</a>
+							<a data-role="button" id="btnSetting" class="btn" data-icon="check" data-inline="true">Save</a>
+							<a data-role="button" data-icon="info" data-inline="true" onclick="showHelp()">Help</a>
+						</div>
+					</div>
+				</form>
+			</div>
+		</div>
+
+		<audio class="egg-aud" src="file.WAV">
+			<source src="file.WAV" />
+		</audio>
+
+		<div data-role="footer" data-position="fixed">
+			<div id="debug"></div>
+		</div>
+	</div>
+
+	<div class="box" id="box">
+		<a class="boxclose" id="boxclose"></a>
+		<h1>Help</h1>
+		<p>1.時間內替小紅帽擊敗所有萬惡的灰太狼</p>
+		<p>2.每回合時間預設為30秒</p>
+		<p>3.可自行調整遊戲難易度包含：MaxWolf , Speed 並在遊戲開始前點擊[Save]</p>
+	</div>
+
+
+	<script>
+
+	var gameLoop=false;
+	var imgWolf= new Image();
+	imgWolf.src="images/Wolf.png";
+	var imgEnd=new Image();
+	imgEnd.src="images/end.png";
+	var imgWolfW=87,imgWolfH=68;
+	var canvas = document.getElementById("myCanvas");
+	var context = canvas.getContext("2d");
+	//canvas坐標變化量
+	var rect=canvas.getBoundingClientRect();
+	var changeX = -1*(rect.left), changeY = -1*(rect.top);
+	//地洞座標
+	var wolfX=new Array(	70,	130,	310,	465,	490,	655	);
+	var wolfY=new Array(	190,	335,	235,	340,	175,	250	);
+	//地洞可否以放狼  true:可(目前空的)	false:不可
+	var seatArr = new Array( true, true, true, true, true, true);		
+	var amount=0;
+	var seat=0;
+	var maxWolf=2; 		//同時出現最多狼的數量
+	var nowWolf=0;
+	var updateTimes=1500;	//狼刷新的時間  單位:豪秒
+	var wolfHideTime=2000;		//狼自動消失的時間  單位:毫秒
+	var myScore=0;		//計分
+	var gameTimeM=0,gameTimeS=30;	//setTimes
+	var timeM=gameTimeM,timeS=gameTimeS;	//計時器使用
+	var userLastScore=0;	
+	var userMaxScore=0;
+	
+	$(document).ready(function() {
+		home();		
+	});
+	
+	
+	<!-------------控制------------------->	
+		function home() {
+			context.clearRect(0, 0, canvas.width, canvas.height);
+			if(gameLoop){
+				//進入遊戲
+				startGameLoop();
+			}else if(!gameLoop){
+				//起始畫面
+				openGame(); 
+					}
+		}
+		
+		<!-------------起始畫面------------------->
+		function openGame() {
+			$('#myCanvas')[0].style.backgroundImage = "url(images/starGamePic.png)";
+			canvas.addEventListener('mousedown', openGameMouse, false);
+			loadUserId();
+			context.save();
+			$(".btn").removeClass("ui-disabled");
+
+
+			function openGameMouse(event) {
+				var x = event.clientX + changeX+20;
+				var y = event.clientY + changeY+30;
+				if (x > 60 & x<187&y>197 & y < 249) {
+					$('#myCanvas')[0].style.backgroundImage = "url(images/scene1.png)";
+					context.clearRect(0, 0, canvas.width, canvas.height);
+					//停止偵測滑鼠事件
+					canvas.removeEventListener('mousedown', openGameMouse,false);
+					startGameLoop();	//Start 進行遊戲
+					$(".btn").addClass("ui-disabled");
+				}
+			}
+
+		}
+		
+		
+	<!----------------遊戲開始---------------->
+		function startGameLoop() {
+			show();	//遊戲資訊
+			myScore=0;	//重置回合分數,回合時間
+			timeM=gameTimeM;
+			timeS=gameTimeS;
+			//監聽滑鼠事件
+			canvas.addEventListener('mousedown', onClickWolf, false);
+			function onClickWolf(){
+				var x = event.clientX + changeX+20;			//鼠標修正x+15,y+20
+				var y = event.clientY + changeY+30;
+				for(i=0;i<seatArr.length;i++)
+				{
+					if(seatArr[i]==false&&x>wolfX[i]&&y>wolfY[i]&&x<(wolfX[i]+imgWolfW)&&y<(wolfY[i]+imgWolfH))
+					{
+						seatArr[i]=true;
+						myScore+=1;
+					}
+				}	
+			}
+			gameLoop=false;	
+			context.save();	
+			var y=-20;	
+			firstLoop = setInterval(first,100);
+			//refresh  地洞
+			seatArr =[true,true, true,true, true,true];
+			function first(){
+				context.clearRect(0, 0, canvas.width, canvas.height);
+				context.globalAlpha=y*-0.05; 	//透明度
+				for(var i = 0; i<seatArr.length; i++ )
+					context.drawImage(imgWolf, wolfX[i], wolfY[i]+y);
+				y++;
+				
+				if(y>1){
+					context.restore();
+					clearInterval(firstLoop);
+					drawWolfLoop = setInterval(drawWolf,60);
+					updateLoop = setInterval(update,updateTimes);
+					
+					//回合計時器
+					setTimeout(timeOut,updateTimes);
+					function timeOut(){
+							if(timeM>=0)
+								if(timeS>0){
+									timeS--;
+									setTimeout(timeOut,1000);
+								}
+								else if(timeS<=0&&timeM>0){
+										timeM--;
+										timeS=59;
+										setTimeout(timeOut,1000);
+								}
+								else if(timeM==0&&timeS==0)
+									endGame();
+					}
+
+				}
+			}
+			
+		
+			
+
+		
+		function drawWolf(){
+			context.clearRect(0,0,canvas.width, canvas.height);
+			show();	//info
+			for(var i=0;i<seatArr.length;i++)
+				if(!seatArr[i])	//有狼就畫出來
+				{	
+					context.drawImage(imgWolf,wolfX[i],wolfY[i]);			
+				}
+		}
+		
+		
+		function update() {
+			nowWolf=0;
+			//檢查目前有幾隻狼在畫面上
+			for(p=0;p<seatArr.length;p++){
+					if(seatArr[p]==false){
+						nowWolf++;
+					}
+			}
+			amount=parseInt((Math.random()*maxWolf)+1);		//亂數取幾隻狼  最多(maxWolf)隻
+				//判斷wolf增加後不得超過總數	
+				if((nowWolf+amount)<=maxWolf){
+					for(i=1;i<=amount;i++){				//設定每隻狼的位子
+						var seatIn=true;
+						do{
+							var numSeat=parseInt(Math.random()*6);
+							if(seatArr[numSeat])				// true沒有狼狀態  false目前有狼    //亂數取位子
+							{	
+								seatArr[numSeat]=false;
+								wolfTimeout(numSeat);
+								 seatIn=false;
+							}								
+						}while(seatIn);
+
+					
+					}
+				}
+		}
+		
+
+			
+		}
+
+		var s="";
+		function wolfTimeout(n){
+			s+=n;
+			setTimeout(function() {
+				seatArr[s.substr(0,1)]=true;
+				s=s.substr(1,s.length);
+			},wolfHideTime);
+			
+		};
+		
+
+		
+	<!--------------	startGameLoop()結束-------------->
+		function endGame() {
+			clearInterval(drawWolfLoop);
+			clearInterval(updateLoop);
+			var y=0
+			context.globalCompositeOperation='source-over';
+			t=setInterval(function () {
+				if(y>=1)
+					clearInterval(t);
+				context.globalAlpha=y;
+				context.drawImage(imgEnd, 0, 200 );
+				y=y+0.05;
+			}	,100);	
+			setTimeout(home,5000);		//5秒後返回主頁面
+			setTimeout(hideInfo,4500);			//清除畫面資訊
+			userLastScore=myScore;
+			userArr[0].last=userLastScore;
+			if(userArr[0].max<userArr[0].last)
+				userArr[0].max=userArr[0].last;
+			localStorage.setItem("userArr",JSON.stringify(userArr));
+		}
+		
+	
+		$("body").mousedown(function (){	
+			$("body").css({'cursor':"url(images/mouse2_90px.png), default"});
+			$(this).find( "audio.egg-aud" )[0].play();
+		});
+		$("body").mouseup(function (){	
+			$("body").css({'cursor':"url(images/mouse1_60px.png), default"});			
+		});
+	
+	var msg;
+	function mouseMoveHandler(event) {
+		msg = "Mouse position: " + (event.clientX + changeX) + ","
+				+ (event.clientY + changeY);
+	}
+	
+	
+	function mouseDownHandler(event) {
+		msg = "Mouse Down!";
+			}
+	
+	function showHelp() {
+		document.getElementById("box").style.left = canvas.width/5 + "px";
+		document.getElementById("box").style.top = canvas.height/5 + "px";
+	}
+	function hideHelp() {
+		document.getElementById("box").style.top = "-300px";
+		event.cancelBubble = true;
+	}
+	document.getElementById("boxclose").onclick = hideHelp;
+	
+	function show() {
+		var changeTimeM=(timeM+100).toString().substr(1,2);
+		var changeTimeS=(timeS+100).toString().substr(1,2);
+		$("#Score").html("Score:&nbsp"+myScore);			//顯示分數
+		$("#Times").html("Time:&nbsp"+changeTimeM+"："+changeTimeS);							//顯示時間
+			
+	}
+	
+	
+	function hideInfo(){
+		myScore=0;				//紀錄上一場分數,歸零
+		$("#Score").html("");			//顯示分數
+		$("#Times").html("");							//顯示時間
+	}
+	
+	<!--------------	↓User控制,紀錄-------------->
+	
+
+
+	$("#btnSetting").click(function(){
+		maxWolf=$("#gameMaxWolf").val()
+		wolfHideTime=parseInt($("input[name=speed]:checked").attr("data-speed"));					
+		// $("input[name=speed]:checked").prop("data-speed")  選不到屬性質   ※debug 1.5hr ...
+		
+	});
+	
+	
+	<!--------------	↓UserData-localStorage-------------->	
+	
+	
+	var userArr=[];
+	
+		$("#username").change(function (){
+			userArr[0].name=$("#username").val();
+			localStorage.setItem("userArr",JSON.stringify(userArr));
+		});
+
+	
+	
+	 	function loadUserId() {
+			if (localStorage["userArr"])
+			{
+				userArr=(localStorage["userArr"]);
+				userArr=JSON.parse(userArr);
+				userLastSocre=userArr[0].last;
+				userMaxScore=userArr[0].max;
+				showUserInfo();
+				
+			}
+			if(!localStorage["userArr"])
+			{
+				userArr=[	{name:$("#username").val(),last:'0',max:'0'}]
+				localStorage.setItem("userArr",JSON.stringify(userArr));
+			}
+		}
+	 	
+	 	
+	 	function showUserInfo() {
+	 		$("#labLastScore").text(userArr[0].last);
+			$("#labMaxScore").text(userArr[0].max);
+	 	}
+	 	
+		function delUserData() {
+			localStorage.clear();
+			loadUserId();
+			showUserInfo();
+			
+		}
+		
+
+	<!--------------	↓debug顯示區-------------->
+
+	setInterval(debug,100);
+	function debug() {
+	$("#debug").html("maxWolf:"+maxWolf+"&nbspwolfHideTime:"+wolfHideTime+
+			"&nbspupdateTimes:"+updateTimes+"&nbspnowWolf:"+nowWolf+"["+msg+"]"/* +
+			"&nbsp[userId]:"+userId.name+"&nbsp[lastScore]:"+userId.last+"&nbsp[maxScore]:"+userId.max */);
+	}
+
+	
+
+	
+	
+</script>
+</body>
+
+</html>

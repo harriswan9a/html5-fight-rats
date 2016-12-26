@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>My first HTML5 app</title>
+<script type="text/javascript" src="jquery.js"></script>
+<script src="jquery-1.9.1.min.js"></script>
+<link rel="stylesheet" href="jquery.mobile-1.3.2/jquery.mobile-1.3.2.min.css" />
+<script src="jquery.mobile-1.3.2/jquery.mobile-1.3.2.min.js"></script>
+
+<style type="text/css">
+.dataRow {
+	color: black;
+	font: 20px/30px Arial;
+	float:right;
+	
+}
+.btn{
+		
+}
+
+#title {
+	color: darkred;
+	font: 50px/80px Arial;
+}
+
+#myCanvas {
+	outline: 5px solid #E9967A;
+	/*background: url(images/starGamePic.png) no-repeat  center;*/
+	
+}
+</style>
+</head>
+<body bgcolor="azure" text="black">
+	<div id="title">title</div>
+	<canvas id="myCanvas" width="780" height="460"
+		onmousedown="mouseDownHandler(event)"
+		onmousemove="mouseMoveHandler(event)">		
+	</canvas>
+	
+	<div data-role="content">
+				<a id = "btnHome" data-role="button" data-icon="home">Home</a>
+				<div class="dataRow" id="mouseText">Mouse position:</div>
+	</div>
+	<script>
+
+	var gameLoop=false;
+	var lastTime=new Date().getTime();
+	var x=50, y=50;
+	var rW, rH;
+	var speed= 100;
+	//貼圖方法---http://stackoverflow.com/questions/16006210/using-drawimage-in-html5
+	var imgWolf= new Image();
+	imgWolf.src="images/Wolf.png";
+	var imgWolfW=87,imgWolfH=68;
+	var canvas = document.getElementById("myCanvas");
+	var context = canvas.getContext("2d");
+	//canvas坐標變化量
+	var rect=canvas.getBoundingClientRect();
+	var changeX = -1*(rect.left), changeY = -1*(rect.top);
+	
+	//地洞座標
+	var wolfX=new Array(	70,	130,	310,	465,	490,	655	);
+	var wolfY=new Array(	190,335,	235,	340,	175,250	);
+	var seatArr = new Array( true, true, true, true, true, true);		//地洞狀態  0:有狼 1:沒有狼
+	var nowWolfY=new Array();
+	var vY=new Array();
+	var amount=0;
+	var seat=0;
+	var maxWolf=6; 		//同時出現最多狼的數量
+	var updateTimes=1.5;	//狼刷新的時間  單位:秒
+	var wolfHideTime=2;		//狼自動消失的時間  單位:秒
+	
+	var ifstart=0;		//0未進入,1進入遊戲
+	$(function() {
+		home();
+	});
+	<!-----初始化設定結束--------->
+	
+		<!-------------控制------------------->	
+		function home() {
+			context.clearRect(0, 0, canvas.width, canvas.height);
+			if(gameLoop){
+				//進入遊戲迴圈
+				startGameLoop();
+			}else if(!gameLoop){
+				//遊戲起始畫面
+				openGame(); 
+					}
+		}
+		
+		<!-------------控制End------------------->
+		function openGame() {
+			canvas.addEventListener('mousedown', openGameMouse, false);
+			context.save();
+			document.getElementById('myCanvas').style.backgroundImage = "url(images/StarGamePic.png)";
+			context.font = "55px Arial italic";
+			context.textBaseline = "top";
+			context.textAlign = "left";
+			context.rotate(355 * Math.PI / 180);
+			context.fillText("Start", 55, 200);
+			context.restore();
+			context.save();
+			context.font = "48px Arial italic";
+			context.textBaseline = "top";
+			context.textAlign = "center";
+			context.rotate(345 * Math.PI / 180);
+			context.fillText("Help", 42, 310);
+			context.restore();
+
+			function openGameMouse(event) {
+				var x = event.clientX + changeX;
+				var y = event.clientY + changeY;
+				if (x > 60 & x<187&y>197 & y < 249) {
+					document.getElementById('myCanvas').style.backgroundImage = "url(images/Scene1.png)";
+					context.clearRect(0, 0, canvas.width, canvas.height);
+					//停止偵測滑鼠事件
+					canvas.removeEventListener('mousedown', openGameMouse,false);
+					gameLoop=true;
+					home();
+				}
+			}
+
+		}
+
+	
+	
+	<!-----------遊戲開始----------->
+		//時間迴圈
+		
+		function startGameLoop() {
+			
+			//監聽事件
+			canvas.addEventListener('mousedown', onClickWolf, false);
+			function onClickWolf(){
+				var x = event.clientX + changeX;
+				var y = event.clientY + changeY;
+			
+				for(i=0;i<=seatArr.length;i++)	
+					if(x>wolfX[i]&y>wolfY[i]&x<(wolfX[i]+imgWolfW)&y<(wolfY[i]+imgWolfH))
+					seatArr[i]=true;
+			}
+			gameLoop=false;
+			
+			context.save();
+			var y=-20;
+			firstLoop = setInterval(first,100);
+			
+			
+
+			seatArr =new Array(true,true, true,true, true,true);
+
+			
+			
+
+		//執行繪圖
+			function first(){
+				//清除整個畫布
+				context.clearRect(0, 0, canvas.width, canvas.height);
+				//第一個
+				context.globalAlpha=y*-0.05; 	//透明度
+				context.drawImage(imgWolf, 70, 190+y);
+				//2.
+				context.drawImage(imgWolf, 130, 335+y);
+				//3.
+				context.drawImage(imgWolf, 310, 235+y);
+				//4.
+				context.drawImage(imgWolf,490 ,175+y );
+				//5.
+				context.drawImage(imgWolf, 465,340+y );
+				//6.
+				context.drawImage(imgWolf,655 ,250+y );
+				y++;
+
+				if(y>1){
+					context.restore();
+					clearInterval(firstLoop);
+					
+					drawWolfLoop = setInterval(drawWolf,1000/100);
+					updateLoop=setInterval(update,updateTimes*1000);
+
+					//endGame();
+					}
+			}
+			
+		
+			
+			
+		
+		function drawWolf(){
+			context.clearRect(0,0,canvas.width, canvas.height);
+			ifstart=1;								//使否進入遊戲  0:未進入   1:進入
+			for(i=0;i<=seatArr.length;i++)
+				if(!seatArr[i])	//有狼就畫出來
+				{	
+					context.drawImage(imgWolf,wolfX[i],wolfY[i]);			
+				}
+		}
+		
+		
+		function update() {
+			var n=0
+			for(p=0;p<=seatArr.length;p++){
+					if(seatArr[p]==false){
+						n++;
+						setTimeout(wolfHide(p),wolfHideTime*1000);
+					}
+			}
+			amount=parseInt(Math.random()*maxWolf+1);		//亂數取幾隻狼  最多(maxWolf)隻
+
+				if((n+amount)<=seatArr.length){
+				for(i=1;i<=amount;i++){				//設定每隻狼的位子
+					var seatIn=true;
+				
+					do{
+						numSeat=parseInt(Math.random()*6);
+						if(seatArr[numSeat])				// true沒有狼狀態  false目前有狼    //亂數取位子
+						{	
+							 seatIn=false;
+							 seatArr[numSeat]=false;
+							 
+						}
+					}while(seatIn);
+					
+				}
+				}
+			}
+		
+
+			
+		}
+
+			function wolfHide(i){
+				gameLoop=false;
+					seatArr[i]=true;
+			}
+
+				
+			
+		
+
+		
+		
+	<!--------------	startGameLoop()結束-------------->
+
+		function endGame() {
+			clearInterval(drawWolfLoop);
+			clearInterval(updateLoop);
+			context.font="46px Arial italic";
+			context.textAlign="center";
+			context.fillText('The    End!!!!', canvas.width / 2, canvas.height / 2);
+			setTimeout(home,3000)		//3秒後返回主頁面
+		}
+	
+	
+	function mouseMoveHandler(event) {
+		var msg = "Mouse position: " + (event.clientX + changeX) + ","
+				+ (event.clientY + changeY);
+		show(msg);
+	}
+	function mouseDownHandler(event) {
+		var msg = "Mouse Down!";
+				show(msg); 
+			}
+	function show(msg) {
+
+		document.getElementById("mouseText").innerHTML = msg+"<br>Max Wolf: "+maxWolf+" 隻<br>amount:"+amount;
+
+	}
+	
+	<!--------------	↓網頁控制區-------------->
+/* 	
+	$("#btnHome").click(function (){
+		if(ifstart==1){
+			clearInterval(drawWolfLoop);
+			clearInterval(updateLoop);
+			ifstart==0
+		}
+		home();
+	}); */
+	
+	
+	
+	//alert(seat+","+amount);
+	//alert();
+</script>
+</body>
+</html>
